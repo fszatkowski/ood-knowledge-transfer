@@ -174,7 +174,7 @@ def get_parser():
     parser = argparse.ArgumentParser(description='Single Image Pretraining, Asano et al. 2020')
     # Generation settings
     parser.add_argument('--img_size', default=32, type=int, help='Size of generated images (default:256)')
-    parser.add_argument('--batch_size', default=32, type=int, help='Batchsize for generation (default:32)')
+    parser.add_argument('--batch_size', default=32, type=int, help='Batchsize for generation (default:32); number of images should be divisible by batch size')
     parser.add_argument('--num_imgs', default=50000, type=int, help='Number of images to be generated (default: 1281167)')
     parser.add_argument('--threads', default=20, type=int, help='how many CPU threads to use for generation (default: 20)')
 
@@ -235,12 +235,3 @@ if __name__ == "__main__":
             p = Image.open(path+"/"+i)
             tensors.append(tfs.ToTensor()(p))
         save_image(tensors, path.replace('/dummy', '.png'), nrow=8, padding=3)
-
-    ############################ 10 imagenet images ########################################
-    # chosen = ['n04443257/n04443257_36457.JPEG',
-    #           'n02129604/n02129604_19761.JPEG', 'n03733281/n03733281_41945.JPEG',
-    #           'n02727426/n02727426_50177.JPEG', 'n07753592/n07753592_3046.JPEG',
-    #           'n03485794/n03485794_27904.JPEG', 'n03220513/n03220513_16200.JPEG',
-    #           'n04487394/n04487394_23489.JPEG',
-    #           'n07614500/n07614500_271.JPEG', 'n02105412/n02105412_3932.JPEG',
-    #           ]

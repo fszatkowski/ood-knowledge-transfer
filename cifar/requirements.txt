@@ -1,3 +1,0 @@
-tensorflow-gpu
-tensorflow_datasets
-tensorflow_addons

@@ -50,8 +50,8 @@ Note that we provide a pretrained teacher model for reproducibility.
 
 #### 2b. Run distillation experiments for *ImageNet* with single-image dataset as follows:
 ```sh
-# in in1k folder:
-python3 distill.py --dataset=in1k --testdir /ILSVRC12/val/ \
+# in src folder:
+python3 distill.py --dataset=src --testdir /ILSVRC12/val/ \
                    --traindir=/path/to/dataset/ --student_arch=resnet50 --teacher_arch=resnet18 
 ```
 Note that teacher models are automatically downloaded from torchvision or timm. 
