@@ -5,7 +5,6 @@ from torch.utils.data import Subset, ConcatDataset
 from torchvision.datasets import CIFAR100, CIFAR10
 
 import utils
-import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 
 CLASSES = {"in1k": 1000, "pets37": 37, "flowers102": 102, "stl10": 10, "places365": 365, 'in100': 100, 'cifar100': 100,
@@ -137,16 +136,7 @@ def get_dataset(dataset_name: str, transform=None, train: bool = False):
 
 
 def get_subset_of_indices(dataset, ratio: float = 0.5):
-    # TODO optimize this code
-    class_indices = {i: [] for i in range(len(set(dataset.targets)))}
-
-    # Group indices by class
-    for idx, (_, label) in enumerate(dataset):
-        class_indices[label].append(idx)
-
-    # Get the first half of indices for each class
-    first_half_indices = []
-    for indices in class_indices.values():
-        first_half_indices.extend(indices[:int(len(indices) * ratio)])
-
+    unique_classes = set(dataset.targets)
+    class_indices = {i: [idx for idx, cls in enumerate(dataset.targets) if cls == i] for i in range(len(unique_classes))}
+    first_half_indices = [idx for indices in class_indices.values() for idx in indices[:int(len(indices) * ratio)]]
     return first_half_indices

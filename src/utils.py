@@ -1,3 +1,4 @@
+import wandb
 from PIL import ImageOps
 
 import numpy as np
@@ -6,10 +7,18 @@ import torch
 import pytorch_lightning as pl
 
 
+def save_hyperparams_to_wandb(args):
+    args_dict = vars(args)
+    for key, value in args_dict.items():
+        setattr(wandb.config, key, value)
+
+
 class Solarize(object):
     """Solarize augmentation from BYOL: https://arxiv.org/abs/2006.07733"""
+
     def __call__(self, x):
         return ImageOps.solarize(x)
+
 
 def rand_bbox(size, lam):
     W = size[2]

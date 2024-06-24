@@ -9,7 +9,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.plugins import DDPPlugin
 from pytorch_lightning.loggers import WandbLogger
 
-import utils
+from utils import save_hyperparams_to_wandb, SaveEvery
 from distiller import ImgDistill
 from data_utils import prepare_data
 
@@ -66,6 +66,8 @@ if __name__ == "__main__":
     # setup logging and saving dirs
     ckpt_path = os.path.join(args.save_dir)
     wandb_logger = WandbLogger()
+    save_hyperparams_to_wandb(args)
+
     checkpoint_callback = ModelCheckpoint(
         dirpath=ckpt_path,
         monitor="val/acc_top1",
@@ -103,7 +105,7 @@ if __name__ == "__main__":
         resume = None
     trainer = Trainer(
         gpus=args.gpus, max_epochs=args.epochs,
-        callbacks=[checkpoint_callback, last_callback, utils.SaveEvery(args.save_every, ckpt_path)],
+        callbacks=[checkpoint_callback, last_callback, SaveEvery(args.save_every, ckpt_path)],
         logger=wandb_logger,
         check_val_every_n_epoch=args.eval_every,
         progress_bar_refresh_rate=1, accelerator="ddp",

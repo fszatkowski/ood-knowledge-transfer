@@ -16,11 +16,11 @@ from models import models_dict
 class ImgDistill(pl.LightningModule):
     def __init__(self,
                  num_classes,
-                 learning_rate,
-                 weight_decay,
-                 temperature,
-                 maxepochs,
                  teacher_ckpt,
+                 learning_rate=0.01,
+                 weight_decay=0.05,
+                 temperature=8,
+                 maxepochs=200,
                  student_arch="resnet18",
                  teacher_arch="resnet50",
                  lr_schedule=True,
@@ -131,19 +131,25 @@ class ImgDistill(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
+        self._evaluation_step(batch, batch_idx, 'val')
+
+    def test_step(self, batch, batch_idx):
+        self._evaluation_step(batch, batch_idx, 'test')
+
+    def _evaluation_step(self, batch, batch_idx, key='val'):
         x, y = batch
 
         student_predictions = self.student(x)
         loss = F.cross_entropy(student_predictions, y)
         topk = utils.accuracy(student_predictions, y, topk=(1, 5))
 
-        self.log("val/loss", loss,
+        self.log(f"{key}/loss", loss,
                  on_step=False, on_epoch=True,
                  prog_bar=True, logger=True)
-        self.log("val/acc_top1", topk[0],
+        self.log(f"{key}/acc_top1", topk[0],
                  on_step=False, on_epoch=True,
                  prog_bar=True, logger=True)
-        self.log("val/acc_top5", topk[1],
+        self.log(f"{key}/acc_top5", topk[1],
                  on_step=False, on_epoch=True,
                  prog_bar=True, logger=True)
 
