@@ -40,6 +40,7 @@ class ImgDistill(pl.LightningModule):
             self.teacher = models.__dict__[teacher_arch](pretrained=num_classes == 1000, num_classes=num_classes)
         if teacher_ckpt != "":
             state_dict = torch.load(teacher_ckpt, map_location="cpu")["state_dict"]
+            # TODO fix for CIFAR 100 archs - is it even necessary if we match train and distill code?
             state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
             state_dict = {k.replace("model.", ""): v for k, v in state_dict.items()}
             self.teacher.load_state_dict(state_dict)

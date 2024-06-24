@@ -113,7 +113,7 @@ if __name__ == "__main__":
         dirpath=ckpt_path,
         monitor="val/acc_top1",
         save_last=True, mode='max',
-        filename=f"best_{args.dataset}"
+        filename=f"best"
     )
     last_callback = ModelCheckpoint(
         dirpath=ckpt_path,

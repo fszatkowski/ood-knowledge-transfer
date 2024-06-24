@@ -13,12 +13,9 @@ import utils
 from distiller import ImgDistill
 from data_utils import prepare_data
 
-CLASSES = {"in1k": 1000, "pets37": 37, "flowers102": 102, "stl10": 10, "places365": 365, 'in100': 100, 'cifar100': 100}
-
 parser = argparse.ArgumentParser(description="Knowledge Distillation From a Single Image.")
 
 parser.add_argument("--gpus", default=-1, type=int, help="how many gpus to use")
-parser.add_argument("--n_samples", default=50000, type=int, help="number of dataset samples")
 parser.add_argument("--resume", action='store_true', help="if set will try to resume the run")
 
 # Teacher settings
@@ -46,13 +43,14 @@ parser.add_argument("--lr", default=0.01, type=float, help="initial learning rat
 parser.add_argument("--wd", default=5e-4, type=float, help="weight decay")
 
 # data
-parser.add_argument("--traindir", default="/tmp/train/", type=str, help="folder with folder(s) of training imgs")
-parser.add_argument("--testdir", default="/datasets/ILSVRC12/val/", type=str, help="folder with folder(s) of test imgs")
+# parser.add_argument("--traindir", default="/tmp/train/", type=str, help="folder with folder(s) of training imgs")
+# parser.add_argument("--testdir", default="/datasets/ILSVRC12/val/", type=str, help="folder with folder(s) of test imgs")
+parser.add_argument("--dst_dataset", default="cifar100", type=str, help="Dataset to use for distillation")
+parser.add_argument("--tgt_dataset", default="cifar100", type=str, help="Dataset to use for evaluation")
 parser.add_argument('--limit_val_batches', default=1., type=float, help='fraction of validation batches to use')
 
 # saving etc.
 parser.add_argument("--save_dir", default="./output/", type=str, help="saving dir")
-parser.add_argument("--dataset", default="in1k", type=str, help="dataset name -- for saving and choosing num_classes")
 parser.add_argument("--workers", default=8, type=int, help="number of workers")
 parser.add_argument("--save_every", default=10, type=int, help="save every n epochs")
 parser.add_argument("--eval_every", default=1, type=int, help="save every n epochs")
@@ -63,7 +61,7 @@ if __name__ == "__main__":
 
     load_dotenv()
 
-    train_loader, val_loader = prepare_data(args)
+    dst_loader, tgt_loader, num_classes = prepare_data(args)
 
     # setup logging and saving dirs
     ckpt_path = os.path.join(args.save_dir)
@@ -72,7 +70,7 @@ if __name__ == "__main__":
         dirpath=ckpt_path,
         monitor="val/acc_top1",
         save_last=True, mode='max',
-        filename=f"best_{args.dataset}"
+        filename=f"best"
     )
     last_callback = ModelCheckpoint(
         dirpath=ckpt_path,
@@ -82,7 +80,7 @@ if __name__ == "__main__":
 
     # training module with teacher and student and optimizer
     distiller = ImgDistill(
-        num_classes=CLASSES[args.dataset],
+        num_classes=num_classes,
         learning_rate=args.lr,
         weight_decay=args.wd,
         temperature=args.temperature,
@@ -120,7 +118,7 @@ if __name__ == "__main__":
         ckpt = {k.replace('student.', ''): v for k, v in ckpt.items() if 'student' in k}
         distiller.student.load_state_dict(ckpt)
         print("loading: ", to_load)
-        trainer.test(distiller, dataloaders=val_loader)
+        trainer.test(distiller, dataloaders=tgt_loader)
     else:
-        trainer.fit(distiller, train_loader, val_loader)
-        trainer.test(distiller, dataloaders=val_loader)
+        trainer.fit(distiller, dst_loader, tgt_loader)
+        trainer.test(distiller, dataloaders=tgt_loader)
