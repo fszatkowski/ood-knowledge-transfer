@@ -33,7 +33,7 @@ class MainModule(pl.LightningModule):
             use_timm=cfg.use_timm,
         )
         if self.mode == "train":
-            if cfg.teacher_arch is not None:
+            if cfg.teacher_arch is None:
                 raise ValueError(
                     'Teacher arch should be None with "train" mode. '
                     'Check if you do not want to use "distill"'
