@@ -1,15 +1,21 @@
+from typing import Dict
+
+import numpy as np
+import pytorch_lightning as pl
+import torch
 import wandb
 from PIL import ImageOps
 
-import numpy as np
 
-import torch
-import pytorch_lightning as pl
+def set_seed(seed):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    pl.seed_everything(seed)
 
 
-def save_hyperparams_to_wandb(args):
-    args_dict = vars(args)
-    for key, value in args_dict.items():
+def save_hyperparams_to_wandb(args: Dict):
+    for key, value in args.items():
         setattr(wandb.config, key, value)
 
 
@@ -23,7 +29,7 @@ class Solarize(object):
 def rand_bbox(size, lam):
     W = size[2]
     H = size[3]
-    cut_rat = np.sqrt(1. - lam)
+    cut_rat = np.sqrt(1.0 - lam)
     cut_w = np.int(W * cut_rat)
     cut_h = np.int(H * cut_rat)
     cx = np.random.randint(W)
@@ -53,15 +59,15 @@ def accuracy(output, target, topk=(1,)):
 
 
 class SaveEvery(pl.Callback):
-    def __init__(self, every, save_path):
+    def __init__(self, every, save_dir):
         self.every = every
-        self.save_path = save_path
+        self.save_dir = save_dir
 
-    def on_epoch_end(self, trainer: pl.Trainer, _):
-        """ Check if we should save a checkpoint after every train epoch """
+    def on_train_epoch_end(self, trainer: pl.Trainer, _):
+        """Check if we should save a checkpoint after every train epoch"""
         epoch = trainer.current_epoch
         if epoch % self.every == 0:
-            ckpt_path = f"{self.save_path}/ckpt_{epoch}.ckpt"
+            ckpt_path = f"{self.save_dir}/ckpt_{epoch}.ckpt"
             trainer.save_checkpoint(ckpt_path)
 
 

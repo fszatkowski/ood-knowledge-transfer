@@ -1,0 +1,35 @@
+mode: train
+
+seed: 0
+accelerator: cuda
+devices: 1
+resume: False
+wandb: True
+tags: [pretraining]
+exp_name: train_cifar10_resnet18
+save_dir: /data/fszatkowski/sid/pretrained/cifar10/resnet18
+workers: 8
+save_every: 10
+eval_every: 1
+
+model_arch: resnet18_32
+num_classes: 100
+use_timm: False
+pretrained: False
+teacher_arch: None
+teacher_ckpt: None
+
+train_dataset: cifar10
+test_dataset: cifar10
+use_kornia: True
+
+maxepochs: 200
+batch_size_train: 512
+batch_size_eval: 2048
+learning_rate: 0.01
+weight_decay: 0.05
+momentum: 0.9
+optimizer: 'adamw'
+scheduler: 'step'
+milestones: [ 100, 150 ]
+lr_decay: 0.5
