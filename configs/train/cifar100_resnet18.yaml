@@ -21,15 +21,12 @@ teacher_ckpt: None
 
 train_dataset: cifar100
 test_dataset: cifar100
-use_kornia: True
+use_kornia: False
 
-maxepochs: 200
+maxepochs: 100
 batch_size_train: 512
 batch_size_eval: 2048
 learning_rate: 0.01
 weight_decay: 0.05
-momentum: 0.9
 optimizer: 'adamw'
-scheduler: 'step'
-milestones: [ 100, 150 ]
-lr_decay: 0.5
+scheduler: 'cosine'

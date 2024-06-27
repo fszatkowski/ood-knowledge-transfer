@@ -62,13 +62,7 @@ class MainModule(pl.LightningModule):
 
         # Training params
         self.maxepochs = cfg.maxepochs
-        self.learning_rate = cfg.learning_rate
-        self.weight_decay = cfg.weight_decay
-        self.momentum = cfg.momentum
-        self.optimizer = cfg.optimizer
-        self.scheduler = cfg.scheduler
-        self.milestones = cfg.milestones
-        self.lr_decay = cfg.lr_decay
+        self.cfg = cfg
 
         # Augmentations
         self.use_kornia = cfg.use_kornia
@@ -221,29 +215,29 @@ class MainModule(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        if self.optimizer.lower() == "adamw":
+        if self.cfg.optimizer.lower() == "adamw":
             optimizer = AdamW(
                 self.model.parameters(),
-                lr=self.learning_rate,
-                weight_decay=self.weight_decay,
+                lr=self.cfg.learning_rate,
+                weight_decay=self.cfg.weight_decay,
             )
-        elif self.optimizer.lower() == "sgd":
+        elif self.cfg.optimizer.lower() == "sgd":
             optimizer = SGD(
                 self.model.parameters(),
-                lr=self.learning_rate,
-                weight_decay=self.weight_decay,
-                momentum=self.momentum,
+                lr=self.cfg.learning_rate,
+                weight_decay=self.cfg.weight_decay,
+                momentum=self.cfg.momentum,
             )
         else:
             raise NotImplementedError()
 
-        if self.scheduler.lower() == "step":
+        if self.cfg.scheduler.lower() == "step":
             scheduler = MultiStepLR(
-                optimizer, milestones=self.milestones, gamma=self.lr_decay
+                optimizer, milestones=self.cfg.milestones, gamma=self.cfg.lr_decay
             )
-        elif self.scheduler.lower() == "cosine":
-            scheduler = CosineAnnealingLR(optimizer, T_max=self.maxepochs, eta_min=1e-6)
-        elif self.scheduler.lower() == "none":
+        elif self.cfg.scheduler.lower() == "cosine":
+            scheduler = CosineAnnealingLR(optimizer, T_max=self.cfg.maxepochs, eta_min=1e-6)
+        elif self.cfg.scheduler.lower() == "none":
             scheduler = None
         else:
             raise NotImplementedError()

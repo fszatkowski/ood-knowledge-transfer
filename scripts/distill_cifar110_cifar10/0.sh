@@ -12,7 +12,8 @@ conda activate sid
 
 for seed in 0 1 2; do
 python src/main.py \
-  --cfg_path configs/train/cifar100_resnet18.yaml \
+  --cfg_path configs/distill/cifar110_cifar10_resnet18.yaml \
   seed=${seed} \
-  save_dir=/data/fszatkowski/sid/pretrained/cifar100/resnet18_${seed}
+  teacher_ckpt=/data/fszatkowski/sid/pretrained/cifar10/resnet18_${seed}/last.ckpt
+  save_dir=/data/fszatkowski/sid/distill/cifar110_cifar10/resnet18_${seed}
 done
