@@ -1,18 +1,19 @@
-mode: train
+mode: eval
 
 seed: 0
 accelerator: cuda
 devices: 1
 resume: False
 wandb: True
-tags: [pretraining]
-exp_name: train_cifar10_resnet18
+tags: [eval]
+exp_name: eval_cifar10_resnet18
 save_dir: /data/fszatkowski/sid/pretrained/cifar10/resnet18
 workers: 8
 save_every: 10
 eval_every: 1
 
 model_arch: resnet18_32
+model_ckpt: /data/fszatkowski/sid/pretrained/cifar10/resnet18/last.ckpt
 num_classes: 100
 use_timm: False
 pretrained: False
@@ -23,13 +24,10 @@ train_dataset: cifar10
 test_dataset: cifar10
 use_kornia: False
 
-maxepochs: 200
-batch_size_train: 128
+maxepochs: 100
+batch_size_train: 512
 batch_size_eval: 2048
 learning_rate: 0.01
 weight_decay: 0.0005
-optimizer: 'sgd'
-momentum: 0.9
-scheduler: 'step'
-milestones: [ 60, 120, 160 ]
-lr_decay: 0.2
+optimizer: 'adamw'
+scheduler: 'cosine'

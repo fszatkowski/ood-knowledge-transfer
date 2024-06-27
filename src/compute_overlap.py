@@ -1,8 +1,9 @@
 import os
-from cmd import parse_args
+import sys
 from logging import SaveEvery, save_hyperparams_to_wandb, set_seed
 
 from dotenv import load_dotenv
+from hydra import compose, initialize
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
@@ -10,6 +11,23 @@ from pytorch_lightning.loggers import WandbLogger
 
 from data_utils import prepare_data
 from main_module import MainModule
+
+
+def parse_args():
+    args = sys.argv
+    assert len(args) >= 3, "You must provide the config path"
+    assert args[1] == "--cfg_path", "You must provide the config path"
+
+    cfg_path = args[2]
+    overrides = args[3:]
+
+    config_dir = "/".join(cfg_path.split("/")[:-1])
+    cfg_name = cfg_path.split("/")[-1].split(".")[0]
+    with initialize(
+        version_base=None, config_path=f"../{config_dir}", job_name="dynamic_config"
+    ):
+        cfg = compose(config_name=cfg_name, overrides=overrides)
+        return cfg
 
 
 def main(cfg: DictConfig) -> None:

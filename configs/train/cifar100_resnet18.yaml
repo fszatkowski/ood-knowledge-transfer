@@ -23,10 +23,13 @@ train_dataset: cifar100
 test_dataset: cifar100
 use_kornia: False
 
-maxepochs: 100
-batch_size_train: 512
+maxepochs: 200
+batch_size_train: 128
 batch_size_eval: 2048
 learning_rate: 0.01
-weight_decay: 0.05
-optimizer: 'adamw'
-scheduler: 'cosine'
+weight_decay: 0.0005
+optimizer: 'sgd'
+momentum: 0.9
+scheduler: 'step'
+milestones: [ 60, 120, 160 ]
+lr_decay: 0.2

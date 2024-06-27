@@ -21,13 +21,13 @@ teacher_ckpt: /data/fszatkowski/sid/pretrained/cifar100/resnet18/last.ckpt
 
 train_dataset: cifar110
 test_dataset: cifar100
-use_kornia: True
+use_kornia: False
 
 maxepochs: 200
 batch_size_train: 128
 batch_size_eval: 1024
 learning_rate: 0.01
-weight_decay: 0.05
+weight_decay: 0.0005
 momentum: 0.9
 optimizer: 'adamw'
 scheduler: 'step'

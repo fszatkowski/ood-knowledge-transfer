@@ -1,19 +1,15 @@
-from typing import Optional
-
 import pytorch_lightning as pl
-import timm.models as timm_models
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision.models as tv_models
 from omegaconf import DictConfig
 from torch import Tensor
 from torch.optim import SGD, AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR, MultiStepLR
 
-import utils
-from data_utils import get_kornia_augs
-from models import models_dict
+from data_utils import cutmix, get_kornia_augs
+from metrics import accuracy
+from model_utils import init_model
 
 
 class MainModule(pl.LightningModule):
@@ -26,13 +22,14 @@ class MainModule(pl.LightningModule):
             "eval",
         ), '"mode" must be one of ("train", "distill", "eval")'
         self.mode = cfg.mode
-        self.model = self._init_model(
-            model_arch=cfg.model_arch,
-            num_classes=cfg.num_classes,
-            pretrained=cfg.pretrained,
-            use_timm=cfg.use_timm,
-        )
+
         if self.mode == "train":
+            self.model = init_model(
+                model_arch=cfg.model_arch,
+                num_classes=cfg.num_classes,
+                pretrained=cfg.pretrained,
+                use_timm=cfg.use_timm,
+            )
             if cfg.teacher_arch is None:
                 raise ValueError(
                     'Teacher arch should be None with "train" mode. '
@@ -43,7 +40,13 @@ class MainModule(pl.LightningModule):
             self._train_step = self._standard_train_step
 
         elif self.mode == "distill":
-            self.teacher = self._init_model(
+            self.model = init_model(
+                model_arch=cfg.model_arch,
+                num_classes=cfg.num_classes,
+                pretrained=cfg.pretrained,
+                use_timm=cfg.use_timm,
+            )
+            self.teacher = init_model(
                 model_arch=cfg.teacher_arch,
                 num_classes=cfg.num_classes,
                 pretrained=cfg.pretrained,
@@ -58,6 +61,13 @@ class MainModule(pl.LightningModule):
             self._train_step = self._distillation_train_step
 
         elif self.mode == "eval":
+            self.model = init_model(
+                model_arch=cfg.model_arch,
+                num_classes=cfg.num_classes,
+                pretrained=cfg.pretrained,
+                use_timm=cfg.use_timm,
+                from_checkpoint=cfg.model_ckpt,
+            )
             self.loss = None
 
         # Training params
@@ -69,40 +79,6 @@ class MainModule(pl.LightningModule):
         if self.use_kornia:
             self.train_augs = get_kornia_augs(cfg.train_dataset)[0]
             self.eval_augs = get_kornia_augs(cfg.test_dataset)[1]
-
-    @staticmethod
-    def _init_model(
-        model_arch: str,
-        num_classes: int = None,
-        pretrained: bool = False,
-        use_timm: bool = False,
-        from_checkpoint: Optional[str] = None,
-    ):
-        if model_arch in models_dict:
-            # Custom models
-            model = models_dict[model_arch](num_classes=num_classes)
-        elif use_timm:
-            # TIMM models
-            model = timm_models.__dict__[model_arch](
-                pretrained=pretrained, num_classes=num_classes
-            )
-        else:
-            # torchvision models
-            model = tv_models.__dict__[model_arch](
-                pretrained=pretrained, num_classes=num_classes
-            )
-
-        if from_checkpoint is not None:
-            # Lightning adds prefixes that must be removed to load the model weights
-            state_dict = torch.load(from_checkpoint, map_location="cpu")["state_dict"]
-            state_dict = {k.replace("model.", ""): v for k, v in state_dict.items()}
-            state_dict = {k.replace("teacher.", ""): v for k, v in state_dict.items()}
-            state_dict = {
-                k: v for k, v in state_dict.items() if k in model.state_dict().keys()
-            }
-            assert len(state_dict) == len(model.state_dict().keys())
-            model.load_state_dict(state_dict)
-        return model
 
     def forward(self, x: Tensor) -> Tensor:
         y = self.model(x)
@@ -144,7 +120,7 @@ class MainModule(pl.LightningModule):
         if self.use_kornia:
             x = self.train_augs(x)
         if self.cutmix:
-            x = utils.cutmixed(x)
+            x = cutmix(x)
 
         with torch.no_grad():
             teacher_predictions = self.teacher(x)
@@ -177,7 +153,7 @@ class MainModule(pl.LightningModule):
 
         predictions = model(x)
         loss = F.cross_entropy(predictions, y)
-        top_k = utils.accuracy(predictions, y, topk=(1, 2, 5))
+        top_k = accuracy(predictions, y, topk=(1, 2, 5))
 
         self.log(
             f"{key}/loss",
@@ -236,7 +212,9 @@ class MainModule(pl.LightningModule):
                 optimizer, milestones=self.cfg.milestones, gamma=self.cfg.lr_decay
             )
         elif self.cfg.scheduler.lower() == "cosine":
-            scheduler = CosineAnnealingLR(optimizer, T_max=self.cfg.maxepochs, eta_min=1e-6)
+            scheduler = CosineAnnealingLR(
+                optimizer, T_max=self.cfg.maxepochs, eta_min=1e-6
+            )
         elif self.cfg.scheduler.lower() == "none":
             scheduler = None
         else:

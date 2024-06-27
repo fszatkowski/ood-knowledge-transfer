@@ -11,8 +11,6 @@ from torch import Tensor
 from torch.utils.data import ConcatDataset, Subset
 from torchvision.datasets import CIFAR10, CIFAR100
 
-import utils
-
 
 def prepare_data(
     cfg: DictConfig,
@@ -85,7 +83,7 @@ def prepare_data(
                     [tv_transforms.ColorJitter(0.4, 0.4, 0.4, 0.4)], p=0.8
                 ),
                 tv_transforms.RandomGrayscale(p=0.2),
-                tv_transforms.RandomApply([utils.Solarize()], p=0.2),
+                tv_transforms.RandomSolarize(threshold=128, p=0.2),
                 tv_transforms.RandomHorizontalFlip(),
                 tv_transforms.ToTensor(),
                 tv_transforms.Normalize(
@@ -224,3 +222,27 @@ class KorniaToTensor(torch.nn.Module):
         x_tmp: np.ndarray = np.array(x)  # HxWxC
         x_out: Tensor = image_to_tensor(x_tmp, keepdim=True)  # CxHxW
         return x_out.float() / 255.0
+
+
+def cutmix(x):
+    with torch.no_grad():
+        lam = np.random.beta(1.0, 1.0)
+        rand_index = torch.randperm(x.size()[0]).cuda()
+        bbx1, bby1, bbx2, bby2 = rand_bbox(x.size(), lam)
+        x[:, :, bbx1:bbx2, bby1:bby2] = x[rand_index, :, bbx1:bbx2, bby1:bby2]
+    return x
+
+
+def rand_bbox(size, lam):
+    W = size[2]
+    H = size[3]
+    cut_rat = np.sqrt(1.0 - lam)
+    cut_w = np.int(W * cut_rat)
+    cut_h = np.int(H * cut_rat)
+    cx = np.random.randint(W)
+    cy = np.random.randint(H)
+    bbx1 = np.clip(cx - cut_w // 2, 0, W)
+    bby1 = np.clip(cy - cut_h // 2, 0, H)
+    bbx2 = np.clip(cx + cut_w // 2, 0, W)
+    bby2 = np.clip(cy + cut_h // 2, 0, H)
+    return bbx1, bby1, bbx2, bby2
