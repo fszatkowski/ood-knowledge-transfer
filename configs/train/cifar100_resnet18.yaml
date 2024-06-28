@@ -8,7 +8,7 @@ wandb: True
 tags: [pretraining]
 exp_name: train_cifar100_resnet18
 save_dir: pretrained/cifar100/resnet18
-workers: 8
+workers: 4
 save_every: 10
 eval_every: 1
 
