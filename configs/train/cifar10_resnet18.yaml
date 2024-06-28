@@ -24,9 +24,9 @@ test_dataset: cifar10
 use_kornia: False
 
 maxepochs: 200
-batch_size_train: 128
+batch_size_train: 256
 batch_size_eval: 2048
-learning_rate: 0.01
+learning_rate: 0.1
 weight_decay: 0.0005
 optimizer: 'sgd'
 momentum: 0.9
