@@ -6,8 +6,8 @@ devices: 1
 resume: False
 wandb: True
 tags: [ distillation ]
-exp_name: distill_cifar100_pneumoniamnist_resnet18
-save_dir: ./distill/cifar100_pneumoniamnist/resnet18
+exp_name: distill_dermamnist_dermamnist_resnet18
+save_dir: distill/dermamnist_dermamnist/resnet18
 workers: 8
 save_every: 10
 eval_every: 1
@@ -17,17 +17,17 @@ num_classes: 7
 use_timm: False
 pretrained: False
 teacher_arch: resnet18_32
-teacher_ckpt: ./pretrained/pneumoniamnist/resnet18/last.ckpt
+teacher_ckpt: pretrained/dermamnist/resnet18/last.ckpt
 
-train_dataset: cifar100
-test_dataset: pneumoniamnist
+train_dataset: dermamnist
+test_dataset: dermamnist
 use_kornia: False
 
 maxepochs: 100
 batch_size_train: 128
 batch_size_eval: 1024
 learning_rate: 0.005
-weight_decay: 0.0005
+weight_decay: 0
 momentum: 0.9
 optimizer: 'adamw'
 scheduler: 'step'

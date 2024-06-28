@@ -13,7 +13,7 @@ save_every: 10
 eval_every: 1
 
 model_arch: resnet18_32
-num_classes: 100
+num_classes: 10
 use_timm: False
 pretrained: False
 teacher_arch: resnet18_32
