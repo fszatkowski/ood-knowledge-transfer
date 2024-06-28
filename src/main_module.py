@@ -102,7 +102,7 @@ class MainModule(pl.LightningModule):
         x, y = batch
         if self.use_kornia:
             x = self.train_augs(x)
-
+        y = y.flatten()
         predictions = self.model(x)
         loss = self.loss(predictions, y)
         self.log(
@@ -121,7 +121,7 @@ class MainModule(pl.LightningModule):
             x = self.train_augs(x)
         if self.cutmix:
             x = cutmix(x)
-
+        y = y.flatten()
         with torch.no_grad():
             teacher_predictions = self.teacher(x)
         student_predictions = self.model(x)

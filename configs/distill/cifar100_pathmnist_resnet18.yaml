@@ -1,0 +1,38 @@
+mode: distill
+
+seed: 0
+accelerator: cuda
+devices: 1
+resume: False
+wandb: True
+tags: [ distillation ]
+exp_name: distill_cifar100_pathmnist_resnet18
+save_dir: ./distill/cifar100_pathmnis/resnet18
+workers: 8
+save_every: 10
+eval_every: 1
+
+model_arch: resnet18_32
+num_classes: 9
+use_timm: False
+pretrained: False
+teacher_arch: resnet18_32
+teacher_ckpt: ./pretrained/pathmnist/resnet18/last.ckpt
+
+train_dataset: cifar100
+test_dataset: pathmnist
+use_kornia: False
+
+maxepochs: 300
+batch_size_train: 128
+batch_size_eval: 1024
+learning_rate: 0.01
+weight_decay: 0.0005
+momentum: 0.9
+optimizer: 'adamw'
+scheduler: 'step'
+milestones: [ 100, 150 ]
+lr_decay: 0.5
+
+temperature: 8
+cutmix: True
