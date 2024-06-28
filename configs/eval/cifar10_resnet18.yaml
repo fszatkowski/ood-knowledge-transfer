@@ -7,13 +7,13 @@ resume: False
 wandb: True
 tags: [eval]
 exp_name: eval_cifar10_resnet18
-save_dir: /data/fszatkowski/sid/pretrained/cifar10/resnet18
+save_dir: pretrained/cifar10/resnet18
 workers: 8
 save_every: 10
 eval_every: 1
 
 model_arch: resnet18_32
-model_ckpt: /data/fszatkowski/sid/pretrained/cifar10/resnet18/last.ckpt
+model_ckpt: pretrained/cifar10/resnet18/last.ckpt
 num_classes: 100
 use_timm: False
 pretrained: False

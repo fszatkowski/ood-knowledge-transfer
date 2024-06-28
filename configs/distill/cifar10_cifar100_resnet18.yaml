@@ -7,7 +7,7 @@ resume: False
 wandb: True
 tags: [ distillation ]
 exp_name: distill_cifar10_cifar100_resnet18
-save_dir: /data/fszatkowski/sid/distill/cifar10_cifar100/resnet18
+save_dir: distillcifar10_cifar100/resnet18
 workers: 8
 save_every: 10
 eval_every: 1
@@ -17,7 +17,7 @@ num_classes: 100
 use_timm: False
 pretrained: False
 teacher_arch: resnet18_32
-teacher_ckpt: /data/fszatkowski/sid/pretrained/cifar100/resnet18/last.ckpt
+teacher_ckpt: pretrained/cifar100/resnet18/last.ckpt
 
 train_dataset: cifar10
 test_dataset: cifar100

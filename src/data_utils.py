@@ -13,6 +13,8 @@ from torchvision.datasets import CIFAR10, CIFAR100
 
 
 def prepare_data(
+    train_dataset_name: str,
+    test_dataset_name: str,
     cfg: DictConfig,
 ) -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     # if args.dataset == 'in1k':
@@ -70,9 +72,9 @@ def prepare_data(
     #     return train_loader, val_loader, CLASSES[args.dataset]
 
     if (
-        cfg.train_dataset == "cifar100"
-        or cfg.train_dataset == "cifar10"
-        or cfg.train_dataset == "cifar110"
+        train_dataset_name == "cifar100"
+        or train_dataset_name == "cifar10"
+        or train_dataset_name == "cifar110"
     ):
         if cfg.use_kornia:
             augs_train = KorniaToTensor()
@@ -91,7 +93,9 @@ def prepare_data(
                 ),
             ]
             augs_train = tv_transforms.Compose(augs_train)
-        train_dataset = get_dataset(cfg.train_dataset, transform=augs_train, train=True)
+        train_dataset = get_dataset(
+            train_dataset_name, transform=augs_train, train=True
+        )
         train_loader = torch.utils.data.DataLoader(
             train_dataset,
             batch_size=cfg.batch_size_train,
@@ -104,9 +108,9 @@ def prepare_data(
         raise NotImplementedError()
 
     if (
-        cfg.test_dataset == "cifar100"
-        or cfg.test_dataset == "cifar10"
-        or cfg.test_dataset == "cifar110"
+        test_dataset_name == "cifar100"
+        or test_dataset_name == "cifar10"
+        or test_dataset_name == "cifar110"
     ):
         if cfg.use_kornia:
             augs_test = KorniaToTensor()
@@ -121,7 +125,7 @@ def prepare_data(
             ]
             augs_test = tv_transforms.Compose(augs_test)
 
-        test_dataset = get_dataset(cfg.test_dataset, transform=augs_test, train=False)
+        test_dataset = get_dataset(test_dataset_name, transform=augs_test, train=False)
         test_loader = torch.utils.data.DataLoader(
             test_dataset,
             batch_size=cfg.batch_size_eval,

@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -51,7 +54,7 @@ class MainModule(pl.LightningModule):
                 num_classes=cfg.num_classes,
                 pretrained=cfg.pretrained,
                 use_timm=cfg.use_timm,
-                from_checkpoint=cfg.teacher_ckpt,
+                from_checkpoint=Path(os.environ["RESULTS_DIR"]) / cfg.teacher_ckpt,
             )
             for param in self.teacher.parameters():
                 param.requires_grad = False

@@ -1,5 +1,6 @@
 import os
 from cmd import parse_args
+from pathlib import Path
 from typing import Dict
 
 import numpy as np
@@ -42,16 +43,19 @@ def save_hyperparams_to_wandb(args: Dict):
 
 def main(cfg: DictConfig) -> None:
     set_seed(cfg.seed)
-    train_loader, test_loader = prepare_data(cfg)
+    train_loader, test_loader = prepare_data(
+        train_dataset_name=cfg.train_dataset,
+        test_dataset_name=cfg.test_dataset,
+        cfg=cfg,
+    )
     # Callbacks
+    save_dir = Path(os.environ["RESULTS_DIR"]) / cfg.save_dir
     checkpoint_callback = ModelCheckpoint(
-        dirpath=cfg.save_dir, monitor="val/acc_top1", mode="max", filename="best"
+        dirpath=save_dir, monitor="val/acc_top1", mode="max", filename="best"
     )
-    last_callback = ModelCheckpoint(
-        dirpath=cfg.save_dir, save_last=True, filename="last"
-    )
+    last_callback = ModelCheckpoint(dirpath=save_dir, save_last=True, filename="last")
     lr_callback = LearningRateMonitor(logging_interval="epoch")
-    save_callback = SaveEvery(cfg.save_every, cfg.save_dir)
+    save_callback = SaveEvery(cfg.save_every, save_dir)
     callbacks = [checkpoint_callback, last_callback, lr_callback, save_callback]
 
     if cfg.wandb:

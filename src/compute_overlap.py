@@ -1,16 +1,17 @@
-import os
 import sys
-from logging import SaveEvery, save_hyperparams_to_wandb, set_seed
 
 from dotenv import load_dotenv
 from hydra import compose, initialize
-from omegaconf import DictConfig, OmegaConf
-from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
-from pytorch_lightning.loggers import WandbLogger
+from omegaconf import DictConfig
 
 from data_utils import prepare_data
-from main_module import MainModule
+from src.main import set_seed
+from src.model_utils import init_model
+
+
+class FeatureHook:
+    # TODO
+    pass
 
 
 def parse_args():
@@ -32,45 +33,19 @@ def parse_args():
 
 def main(cfg: DictConfig) -> None:
     set_seed(cfg.seed)
-    train_loader, test_loader = prepare_data(cfg)
-    # Callbacks
-    checkpoint_callback = ModelCheckpoint(
-        dirpath=cfg.save_dir, monitor="val/acc_top1", mode="max", filename="best"
+    train_loader_src, test_loader_src = prepare_data(
+        train_dataset_name=cfg.src_dataset,
+        test_dataset_name=cfg.src_dataset,
+        cfg=cfg,
     )
-    last_callback = ModelCheckpoint(
-        dirpath=cfg.save_dir, save_last=True, filename="last"
+    train_loader_dst, test_loader_dst = prepare_data(
+        train_dataset_name=cfg.dst_dataset,
+        test_dataset_name=cfg.dst_dataset,
+        cfg=cfg,
     )
-    lr_callback = LearningRateMonitor(logging_interval="epoch")
-    save_callback = SaveEvery(cfg.save_every, cfg.save_dir)
-    callbacks = [checkpoint_callback, last_callback, lr_callback, save_callback]
 
-    if cfg.wandb:
-        wandb_logger = WandbLogger(
-            name=cfg.exp_name,
-            project=os.environ["WANDB_PROJECT"],
-            entity=os.environ["WANDB_ENTITY"],
-            tags=cfg.tags,
-        )
-        save_hyperparams_to_wandb(OmegaConf.to_container(cfg))
-        logger = wandb_logger
-    else:
-        logger = True
-
-    trainer = Trainer(
-        accelerator=cfg.accelerator,
-        devices=cfg.devices,
-        callbacks=callbacks,
-        logger=logger,
-        max_epochs=cfg.maxepochs,
-        check_val_every_n_epoch=cfg.eval_every,
-    )
-    main_system = MainModule(cfg)
-    if cfg.mode == "train" or cfg.mode == "distill":
-        trainer.fit(main_system, train_loader, test_loader)
-    elif cfg.mode == "eval":
-        trainer.test(main_system, test_loader)
-    else:
-        raise NotImplementedError('"mode" must be one of ("train", "distill", "eval")')
+    model = init_model(model_arch=cfg.model_arch, from_checkpoint=cfg.ckpt_path)
+    feature_layer = getattr(model, cfg.feature_layer)
 
 
 if __name__ == "__main__":

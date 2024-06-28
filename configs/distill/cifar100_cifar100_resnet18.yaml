@@ -7,7 +7,7 @@ resume: False
 wandb: True
 tags: [ distillation ]
 exp_name: distill_cifar100_cifar100_resnet18
-save_dir: /data/fszatkowski/sid/distill/cifar100_cifar100/resnet18
+save_dir: distillcifar100_cifar100/resnet18
 workers: 8
 save_every: 10
 eval_every: 1
@@ -17,7 +17,7 @@ num_classes: 100
 use_timm: False
 pretrained: False
 teacher_arch: resnet18_32
-teacher_ckpt: /data/fszatkowski/sid/pretrained/cifar100/resnet18/last.ckpt
+teacher_ckpt: pretrained/cifar100/resnet18/last.ckpt
 
 train_dataset: cifar100
 test_dataset: cifar100
@@ -25,14 +25,14 @@ use_kornia: False
 
 maxepochs: 200
 batch_size_train: 128
-batch_size_eval: 1024
+batch_size_eval: 2048
 learning_rate: 0.01
 weight_decay: 0.0005
+optimizer: 'sgd'
 momentum: 0.9
-optimizer: 'adamw'
 scheduler: 'step'
-milestones: [ 100, 150 ]
-lr_decay: 0.5
+milestones: [ 60, 120, 160 ]
+lr_decay: 0.2
 
 temperature: 8
 cutmix: True

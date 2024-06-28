@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional
 
 import timm.models as timm_models
@@ -12,7 +13,7 @@ def init_model(
     num_classes: int = None,
     pretrained: bool = False,
     use_timm: bool = False,
-    from_checkpoint: Optional[str] = None,
+    from_checkpoint: Optional[Path] = None,
 ):
     if model_arch in models_dict:
         # Custom models
