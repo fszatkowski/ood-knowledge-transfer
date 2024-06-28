@@ -1,7 +1,9 @@
 *pyc
 .env
+*.ckpt
 
 data/*
+results/*
 pretrained/*
 distill/*
 wandb/*

@@ -7,7 +7,7 @@ resume: False
 wandb: True
 tags: [ distillation ]
 exp_name: distill_cifar100_pathmnist_resnet18
-save_dir: ./distill/cifar100_pathmnis/resnet18
+save_dir: ./distill/cifar100_pathmnist/resnet18
 workers: 8
 save_every: 10
 eval_every: 1
@@ -23,10 +23,10 @@ train_dataset: cifar100
 test_dataset: pathmnist
 use_kornia: False
 
-maxepochs: 300
+maxepochs: 100
 batch_size_train: 128
 batch_size_eval: 1024
-learning_rate: 0.01
+learning_rate: 0.005
 weight_decay: 0.0005
 momentum: 0.9
 optimizer: 'adamw'

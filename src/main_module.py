@@ -6,11 +6,12 @@ from omegaconf import DictConfig
 from torch import Tensor
 from torch.optim import SGD, AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR, MultiStepLR
+from torchmetrics.classification import MulticlassF1Score as F1
+from torchmetrics import AUROC
 
 from data_utils import cutmix, get_kornia_augs
 from metrics import accuracy
 from model_utils import init_model
-
 
 class MainModule(pl.LightningModule):
     def __init__(self, cfg: DictConfig):
@@ -80,6 +81,10 @@ class MainModule(pl.LightningModule):
             self.train_augs = get_kornia_augs(cfg.train_dataset)[0]
             self.eval_augs = get_kornia_augs(cfg.test_dataset)[1]
 
+        # Metrics
+        self.val_f1 = F1(num_classes=cfg.num_classes)
+        self.val_auc = AUROC(task="multiclass", num_classes=cfg.num_classes)
+
     def forward(self, x: Tensor) -> Tensor:
         y = self.model(x)
         return y
@@ -113,6 +118,7 @@ class MainModule(pl.LightningModule):
             prog_bar=True,
             logger=True,
         )
+
         return loss
 
     def _distillation_train_step(self, batch, batch_idx):
@@ -134,6 +140,7 @@ class MainModule(pl.LightningModule):
             prog_bar=True,
             logger=True,
         )
+
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -141,8 +148,6 @@ class MainModule(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         self._evaluation_step(self.model, batch, batch_idx, "test")
-
-        # TODO add additional metrics (e.g. latent coverage)
 
     @torch.inference_mode()
     def _evaluation_step(self, model, batch, batch_idx, key="val"):
@@ -154,6 +159,10 @@ class MainModule(pl.LightningModule):
         predictions = model(x)
         loss = F.cross_entropy(predictions, y)
         top_k = accuracy(predictions, y, topk=(1, 2, 5))
+
+        if key == "val":
+            self.val_f1(predictions, y)
+            self.val_auc(predictions, y)
 
         self.log(
             f"{key}/loss",
@@ -189,6 +198,16 @@ class MainModule(pl.LightningModule):
         )
 
         return loss
+
+    def on_train_epoch_end(self):
+        pass
+
+    def on_validation_epoch_end(self):
+        # Log F1 and AUC scores at the end of each validation epoch
+        self.log('val/f1_score', self.val_f1.compute(), on_epoch=True, prog_bar=True, logger=True)
+        self.log('val/auc', self.val_auc.compute(), on_epoch=True, prog_bar=True, logger=True)
+        self.val_f1.reset()
+        self.val_auc.reset()
 
     def configure_optimizers(self):
         if self.cfg.optimizer.lower() == "adamw":

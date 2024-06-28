@@ -12,6 +12,7 @@ from torch.utils.data import ConcatDataset, Subset
 from torchvision.datasets import CIFAR10, CIFAR100
 from medmnist import *
 
+
 def prepare_data(
     train_dataset_name: str,
     test_dataset_name: str,
@@ -195,8 +196,8 @@ def rand_bbox(size, lam):
     W = size[2]
     H = size[3]
     cut_rat = np.sqrt(1.0 - lam)
-    cut_w = np.int(W * cut_rat)
-    cut_h = np.int(H * cut_rat)
+    cut_w = np.int32(W * cut_rat)
+    cut_h = np.int32(H * cut_rat)
     cx = np.random.randint(W)
     cy = np.random.randint(H)
     bbx1 = np.clip(cx - cut_w // 2, 0, W)

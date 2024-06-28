@@ -6,21 +6,21 @@ devices: 1
 resume: False
 wandb: True
 tags: [ distillation ]
-exp_name: distill_cifar100_dermamnist_resnet18
-save_dir: distill/cifar100_dermamnist/resnet18
+exp_name: distill_cifar100_pneumoniamnist_resnet18
+save_dir: ./distill/cifar100_pneumoniamnist/resnet18
 workers: 8
 save_every: 10
 eval_every: 1
 
 model_arch: resnet18_32
-num_classes: 7
+num_classes: 2
 use_timm: False
 pretrained: False
 teacher_arch: resnet18_32
-teacher_ckpt: pretrained/dermamnist/resnet18/last.ckpt
+teacher_ckpt: ./pretrained/pneumoniamnist/resnet18/last.ckpt
 
 train_dataset: cifar100
-test_dataset: dermamnist
+test_dataset: pneumoniamnist
 use_kornia: False
 
 maxepochs: 100
