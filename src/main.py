@@ -89,5 +89,6 @@ def main(cfg: DictConfig) -> None:
 
 if __name__ == "__main__":
     load_dotenv()
+    wandb.init()
     cfg = parse_args()
     main(cfg)

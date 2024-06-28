@@ -150,7 +150,7 @@ class MainModule(pl.LightningModule):
 
         if self.use_kornia:
             x = self.eval_augs(x)
-
+        y = y.flatten()
         predictions = model(x)
         loss = F.cross_entropy(predictions, y)
         top_k = accuracy(predictions, y, topk=(1, 2, 5))

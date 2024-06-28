@@ -10,15 +10,17 @@ from omegaconf import DictConfig
 from torch import Tensor
 from torch.utils.data import ConcatDataset, Subset
 from torchvision.datasets import CIFAR10, CIFAR100
-from medmnist import DermaMNIST, PathMNIST
+from medmnist import *
 
 def prepare_data(
+    train_dataset_name: str,
+    test_dataset_name: str,
     cfg: DictConfig,
 ) -> Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
 
-    datasets_list = ["cifar100", "cifar10", "cifar110", "dermamnist", "pathmnist"]
+    dataset_name_list = ["cifar100", "cifar10", "cifar110", "pathmnist", "dermamnist"]
 
-    if cfg.train_dataset in datasets_list:
+    if train_dataset_name in dataset_name_list:
         if cfg.use_kornia:
             augs_train = KorniaToTensor()
         else:
@@ -36,7 +38,9 @@ def prepare_data(
                 ),
             ]
             augs_train = tv_transforms.Compose(augs_train)
-        train_dataset = get_dataset(cfg.train_dataset, transform=augs_train, train=True)
+        train_dataset = get_dataset(
+            train_dataset_name, transform=augs_train, train=True
+        )
         train_loader = torch.utils.data.DataLoader(
             train_dataset,
             batch_size=cfg.batch_size_train,
@@ -48,7 +52,7 @@ def prepare_data(
     else:
         raise NotImplementedError()
 
-    if cfg.test_dataset in datasets_list:
+    if test_dataset_name in dataset_name_list:
         if cfg.use_kornia:
             augs_test = KorniaToTensor()
         else:
@@ -62,7 +66,7 @@ def prepare_data(
             ]
             augs_test = tv_transforms.Compose(augs_test)
 
-        test_dataset = get_dataset(cfg.test_dataset, transform=augs_test, train=False)
+        test_dataset = get_dataset(test_dataset_name, transform=augs_test, train=False)
         test_loader = torch.utils.data.DataLoader(
             test_dataset,
             batch_size=cfg.batch_size_eval,
@@ -77,9 +81,9 @@ def prepare_data(
 
 
 def get_kornia_augs(dataset_name: str) -> Tuple[Callable, Callable]:
-    datasets_list = ["cifar100", "cifar10", "cifar110", "dermamnist", "pathmnist"]
     # Returns kornia augmentations for a given dataset
-    if dataset_name in datasets_list:
+    dataset_name_list = ["cifar100", "cifar10", "cifar110", "pathmnist", "dermamnist"]
+    if dataset_name in dataset_name_list:
         augs_train = [
             kornia_transforms.RandomResizedCrop((32, 32), scale=(0.08, 1.0)),
             kornia_transforms.ColorJitter(
@@ -109,6 +113,7 @@ def get_dataset(dataset_name: str, transform=None, train: bool = False):
         dataset = PathMNIST(
             root=os.environ["DATA_DIR"],
             download=True,
+            size=64,
             split="train" if train else "test",
             transform=transform,
         )
@@ -116,6 +121,7 @@ def get_dataset(dataset_name: str, transform=None, train: bool = False):
         dataset = DermaMNIST(
             root=os.environ["DATA_DIR"],
             download=True,
+            size=64,
             split="train" if train else "test",
             transform=transform,
         )
@@ -175,6 +181,7 @@ class KorniaToTensor(torch.nn.Module):
         x_out: Tensor = image_to_tensor(x_tmp, keepdim=True)  # CxHxW
         return x_out.float() / 255.0
 
+
 def cutmix(x):
     with torch.no_grad():
         lam = np.random.beta(1.0, 1.0)
@@ -188,8 +195,8 @@ def rand_bbox(size, lam):
     W = size[2]
     H = size[3]
     cut_rat = np.sqrt(1.0 - lam)
-    cut_w = int(W * cut_rat)
-    cut_h = int(H * cut_rat)
+    cut_w = np.int(W * cut_rat)
+    cut_h = np.int(H * cut_rat)
     cx = np.random.randint(W)
     cy = np.random.randint(H)
     bbx1 = np.clip(cx - cut_w // 2, 0, W)

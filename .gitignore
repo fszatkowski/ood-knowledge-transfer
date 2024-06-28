@@ -1,5 +1,7 @@
 *pyc
+.env
 
 data/*
 pretrained/*
 distill/*
+wandb/*
