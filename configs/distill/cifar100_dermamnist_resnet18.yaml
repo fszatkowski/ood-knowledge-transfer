@@ -7,7 +7,7 @@ resume: False
 wandb: True
 tags: [ distillation ]
 exp_name: distill_cifar100_dermamnist_resnet18
-save_dir: ./distill/cifar100_dermamnis/resnet18
+save_dir: distill/cifar100_dermamnis/resnet18
 workers: 8
 save_every: 10
 eval_every: 1
@@ -17,7 +17,7 @@ num_classes: 7
 use_timm: False
 pretrained: False
 teacher_arch: resnet18_32
-teacher_ckpt: ./pretrained/dermamnist/resnet18/last.ckpt
+teacher_ckpt: pretrained/dermamnist/resnet18/last.ckpt
 
 train_dataset: cifar100
 test_dataset: dermamnist

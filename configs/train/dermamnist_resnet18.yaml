@@ -7,7 +7,7 @@ resume: False
 wandb: True
 tags: [pretraining]
 exp_name: train_dermamnist_resnet18
-save_dir: ./pretrained/dermamnist/resnet18
+save_dir: pretrained/dermamnist/resnet18
 workers: 8
 save_every: 10
 eval_every: 1
