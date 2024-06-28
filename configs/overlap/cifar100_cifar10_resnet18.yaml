@@ -1,0 +1,21 @@
+seed: 0
+device: cuda
+workers: 4
+n_passes: 1
+
+model_arch: resnet18_32
+num_classes: 100
+feature_layer: avg_pool
+use_timm: False
+pretrained: False
+model_ckpt: pretrained/cifar100/resnet18/last.ckpt
+
+src_dataset: cifar100
+dst_dataset: cifar10
+use_kornia: False
+
+batch_size_train: 512
+batch_size_eval: 512
+
+lsh_proj_dims: [14, 15, 16]
+num_lsh_projs: 10

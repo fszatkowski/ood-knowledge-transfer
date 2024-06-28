@@ -1,5 +1,4 @@
 import os
-from cmd import parse_args
 from pathlib import Path
 from typing import Dict
 
@@ -12,6 +11,7 @@ from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import Callback, LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 
+from commandline_utils import parse_args
 from data_utils import prepare_data
 from main_module import MainModule
 

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -31,6 +32,7 @@ def init_model(
 
     if from_checkpoint is not None:
         # Lightning adds prefixes that must be removed to load the model weights
+        from_checkpoint = Path(os.environ["RESULTS_DIR"]) / from_checkpoint
         state_dict = torch.load(from_checkpoint, map_location="cpu")["state_dict"]
         state_dict = {k.replace("model.", ""): v for k, v in state_dict.items()}
         state_dict = {k.replace("teacher.", ""): v for k, v in state_dict.items()}

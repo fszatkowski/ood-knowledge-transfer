@@ -180,24 +180,21 @@ def get_dataset(dataset_name: str, transform=None, train: bool = False):
             root=os.environ["DATA_DIR"], download=True, train=train, transform=transform
         )
     elif dataset_name == "cifar110":
-        if train:
-            ds1 = CIFAR100(
-                root=os.environ["DATA_DIR"],
-                download=True,
-                train=True,
-                transform=transform,
-            )
-            ds2 = CIFAR10(
-                root=os.environ["DATA_DIR"],
-                download=True,
-                train=True,
-                transform=transform,
-            )
-            ds1 = Subset(ds1, get_subset_of_indices(ds1, ratio=0.5))
-            ds2 = Subset(ds2, get_subset_of_indices(ds2, ratio=0.5))
-            dataset = ConcatDataset([ds1, ds2])
-        else:
-            raise NotImplementedError()
+        ds1 = CIFAR100(
+            root=os.environ["DATA_DIR"],
+            download=True,
+            train=train,
+            transform=transform,
+        )
+        ds2 = CIFAR10(
+            root=os.environ["DATA_DIR"],
+            download=True,
+            train=train,
+            transform=transform,
+        )
+        ds1 = Subset(ds1, get_subset_of_indices(ds1, ratio=0.5))
+        ds2 = Subset(ds2, get_subset_of_indices(ds2, ratio=0.5))
+        dataset = ConcatDataset([ds1, ds2])
     else:
         raise NotImplementedError()
 
