@@ -7,7 +7,7 @@ resume: False
 wandb: True
 tags: [ distillation ]
 exp_name: distill_cifar10_cifar100_resnet18
-save_dir: distillcifar10_cifar100/resnet18
+save_dir: distill/cifar10_cifar100/resnet18
 workers: 8
 save_every: 10
 eval_every: 1
