@@ -1,15 +1,43 @@
 import os
 from cmd import parse_args
-from logging import SaveEvery, save_hyperparams_to_wandb, set_seed
+from typing import Dict
 
+import numpy as np
+import torch
+import wandb
 from dotenv import load_dotenv
 from omegaconf import DictConfig, OmegaConf
-from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+from pytorch_lightning import Trainer, seed_everything
+from pytorch_lightning.callbacks import Callback, LearningRateMonitor, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 
 from data_utils import prepare_data
 from main_module import MainModule
+
+
+class SaveEvery(Callback):
+    def __init__(self, every, save_dir):
+        self.every = every
+        self.save_dir = save_dir
+
+    def on_train_epoch_end(self, trainer: Trainer, _):
+        """Check if we should save a checkpoint after every train epoch"""
+        epoch = trainer.current_epoch
+        if epoch % self.every == 0:
+            ckpt_path = f"{self.save_dir}/ckpt_{epoch}.ckpt"
+            trainer.save_checkpoint(ckpt_path)
+
+
+def set_seed(seed):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    seed_everything(seed)
+
+
+def save_hyperparams_to_wandb(args: Dict):
+    for key, value in args.items():
+        setattr(wandb.config, key, value)
 
 
 def main(cfg: DictConfig) -> None:
