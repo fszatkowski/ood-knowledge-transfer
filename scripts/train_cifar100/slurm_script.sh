@@ -22,5 +22,5 @@ python src/main.py \
   weight_decay=${wd} \
   lr_decay=${decay} \
   seed=${seed} \
-  save_dir=pretrained/cifar100/resnet18_bs_${batch_size}_lr_${lr}_wd_${wd}_lr_decay_${decay}_seed_${seed}/last.ckpt \
+  save_dir=pretrained/cifar100/resnet18_bs_${batch_size}_lr_${lr}_wd_${wd}_lr_decay_${decay}_seed_${seed} \
   exp_name=train_cifar100_resnet18_bs_${batch_size}_lr_${lr}_wd_${wd}_lr_decay_${decay}

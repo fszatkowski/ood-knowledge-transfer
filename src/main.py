@@ -90,7 +90,4 @@ def main(cfg: DictConfig) -> None:
 if __name__ == "__main__":
     load_dotenv()
     cfg = parse_args()
-    wandb.init(
-        name=f"{cfg.mode}_testset_{cfg.test_dataset}_trainset_{cfg.train_dataset}"
-    )
     main(cfg)

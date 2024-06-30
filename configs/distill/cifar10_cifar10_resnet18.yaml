@@ -13,7 +13,7 @@ save_every: 10
 eval_every: 1
 
 model_arch: resnet18_32
-num_classes: 10
+num_classes: 100
 use_timm: False
 pretrained: False
 teacher_arch: resnet18_32
@@ -22,16 +22,15 @@ teacher_ckpt: pretrained/cifar10/resnet18/last.ckpt
 train_dataset: cifar10
 test_dataset: cifar10
 use_kornia: False
+
 maxepochs: 200
 batch_size_train: 128
 batch_size_eval: 2048
-learning_rate: 0.01
+learning_rate: 0.1
 weight_decay: 0.0005
 optimizer: 'sgd'
 momentum: 0.9
-scheduler: 'step'
-milestones: [ 60, 120, 160 ]
-lr_decay: 0.2
+scheduler: 'cosine'
 
-temperature: 8
-cutmix: True
+temperature: 2
+cutmix: False

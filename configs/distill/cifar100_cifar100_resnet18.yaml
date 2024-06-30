@@ -26,13 +26,11 @@ use_kornia: False
 maxepochs: 200
 batch_size_train: 128
 batch_size_eval: 2048
-learning_rate: 0.01
+learning_rate: 0.1
 weight_decay: 0.0005
 optimizer: 'sgd'
 momentum: 0.9
-scheduler: 'step'
-milestones: [ 60, 120, 160 ]
-lr_decay: 0.2
+scheduler: 'cosine'
 
-temperature: 8
-cutmix: True
+temperature: 2
+cutmix: False

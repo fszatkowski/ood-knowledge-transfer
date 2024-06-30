@@ -9,18 +9,19 @@ set -e
 eval "$(conda shell.bash hook)"
 conda activate ood_kd
 
-batch_size=$1
-lr=$2
-wd=$3
-decay=$4
-seed=$5
+dataset=$1
+batch_size=$2
+lr=$3
+wd=$4
+decay=$5
+seed=$6
 
 python src/main.py \
-  --cfg_path configs/train/cifar10_resnet18.yaml \
+  --cfg_path configs/train/${dataset}_resnet18.yaml \
   batch_size_train=${batch_size} \
   learning_rate=${lr} \
   weight_decay=${wd} \
   lr_decay=${decay} \
   seed=${seed} \
-  save_dir=pretrained/cifar10/resnet18_bs_${batch_size}_lr_${lr}_wd_${wd}_lr_decay_${decay}_seed_${seed} \
-  exp_name=train_cifar10_resnet18_bs_${batch_size}_lr_${lr}_wd_${wd}_lr_decay_${decay}
+  save_dir=pretrained/${dataset}/resnet18_bs_${batch_size}_lr_${lr}_wd_${wd}_lr_decay_${decay}_seed_${seed} \
+  exp_name=train_${dataset}_resnet18_bs_${batch_size}_lr_${lr}_wd_${wd}_lr_decay_${decay}
